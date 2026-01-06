@@ -1,0 +1,4 @@
+Poze/
+__pycache__/
+*.pyc
+.env
