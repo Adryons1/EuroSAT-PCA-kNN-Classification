@@ -21,13 +21,15 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # Config
 # -----------------------------
-DATASET_DIR = r"C:\Users\adria\Desktop\SIVA AN1\S1\CPPSMS\Poze"  # <-- schimbă cu calea ta
-IMG_SIZE = (64, 64)              # 64x64 e ok pt început (rapid)
+EXPERIMENT = 3  # 1 = momente, 2 = PCA, 3 = momente + PCA
+
+DATASET_DIR = r"C:\Users\adria\Desktop\SIVA AN1\S1\CPPSMS\Poze"  
+IMG_SIZE = (64, 64)              
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
 
-PCA_COMPONENTS = 50              # începe cu 20/50/100 și compari
-KNN_K = 5                        # începe cu 3/5/7 și compari
+PCA_COMPONENTS = 50              
+KNN_K = 5                        
 
 
 # -----------------------------
@@ -47,9 +49,7 @@ def list_images_by_folder(dataset_dir: str):
         for img_path in class_dir.glob("*.jpg"):
             items.append((str(img_path), label))
 
-        # dacă ai și .png, poți activa:
-        # for img_path in class_dir.glob("*.png"):
-        #     items.append((str(img_path), label))
+        
 
     if len(items) == 0:
         raise RuntimeError("Nu am găsit imagini .jpg în folderele de clase.")
@@ -136,7 +136,7 @@ def main():
 
     # -------------------------
     # PCA pe imaginile vectorizate
-    # PCA implică "covariance matrix computation" intern (pe datele standardizate)
+    # PCA implică "covariance matrix computation" 
     # -------------------------
     scaler_img = StandardScaler(with_mean=True, with_std=True)
     X_img_train_std = scaler_img.fit_transform(X_img_train)
@@ -151,17 +151,34 @@ def main():
     print("Explained variance total:", float(np.sum(pca.explained_variance_ratio_)))
 
 
-    # standardizează momentele (util pt kNN)
-
     # -------------------------
-    # EXPERIMENT 3: k-NN pe [momente + PCA]
+    # Selectare experiment (features)
     # -------------------------
-    scaler_mom = StandardScaler()
-    X_mom_train_std = scaler_mom.fit_transform(X_mom_train)
-    X_mom_test_std  = scaler_mom.transform(X_mom_test)
+    if EXPERIMENT == 1:
+        # EXP1: k-NN doar pe momente
+        scaler_mom = StandardScaler()
+        X_feat_train = scaler_mom.fit_transform(X_mom_train)
+        X_feat_test  = scaler_mom.transform(X_mom_test)
+        exp_name = "EXP1: momente"
 
-    X_feat_train = np.hstack([X_mom_train_std, X_pca_train])
-    X_feat_test  = np.hstack([X_mom_test_std,  X_pca_test])
+    elif EXPERIMENT == 2:
+        # EXP2: k-NN doar pe PCA
+        X_feat_train = X_pca_train
+        X_feat_test  = X_pca_test
+        exp_name = "EXP2: PCA"
+
+    elif EXPERIMENT == 3:
+        # EXP3: k-NN pe [momente + PCA]
+        scaler_mom = StandardScaler()
+        X_mom_train_std = scaler_mom.fit_transform(X_mom_train)
+        X_mom_test_std  = scaler_mom.transform(X_mom_test)
+
+        X_feat_train = np.hstack([X_mom_train_std, X_pca_train])
+        X_feat_test  = np.hstack([X_mom_test_std,  X_pca_test])
+        exp_name = "EXP3: momente + PCA"
+
+    else:
+        raise ValueError("EXPERIMENT trebuie să fie 1, 2 sau 3")
 
     # -------------------------
     # k-NN
