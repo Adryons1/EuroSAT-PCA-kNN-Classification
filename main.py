@@ -150,17 +150,16 @@ def main():
     print("Explained variance ratio (primele 10):", np.round(pca.explained_variance_ratio_[:10], 4))
     print("Explained variance total:", float(np.sum(pca.explained_variance_ratio_)))
 
-    # -------------------------
-    # (Opțional) combină momente + PCA
+
     # -------------------------
     # standardizează momentele (util pt kNN)
 
     # -------------------------
-    # EXPERIMENT 2: k-NN doar pe PCA
+    # EXPERIMENT 1: k-NN doar pe momente
     # -------------------------
-    X_feat_train = X_pca_train
-    X_feat_test  = X_pca_test
-
+    scaler_mom = StandardScaler()
+    X_feat_train = scaler_mom.fit_transform(X_mom_train)
+    X_feat_test  = scaler_mom.transform(X_mom_test)
 
 
     # -------------------------
@@ -171,7 +170,7 @@ def main():
     y_pred = knn.predict(X_feat_test)
 
     acc = accuracy_score(y_test, y_pred)
-    print(f"\n=== EXP2: k-NN (k={KNN_K}) pe PCA ===")
+    print(f"\n=== EXP1: k-NN (k={KNN_K}) pe momente ===")
     print("Accuracy:", acc)
     print("\nClassification report:")
     print(classification_report(y_test, y_pred))
