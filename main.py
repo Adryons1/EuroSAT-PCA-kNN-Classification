@@ -154,12 +154,14 @@ def main():
     # (Opțional) combină momente + PCA
     # -------------------------
     # standardizează momentele (util pt kNN)
-    scaler_mom = StandardScaler()
-    X_mom_train_std = scaler_mom.fit_transform(X_mom_train)
-    X_mom_test_std  = scaler_mom.transform(X_mom_test)
 
-    X_feat_train = np.hstack([X_mom_train_std, X_pca_train])
-    X_feat_test  = np.hstack([X_mom_test_std,  X_pca_test])
+    # -------------------------
+    # EXPERIMENT 1: k-NN doar pe momente
+    # -------------------------
+    scaler_mom = StandardScaler()
+    X_feat_train = scaler_mom.fit_transform(X_mom_train)
+    X_feat_test  = scaler_mom.transform(X_mom_test)
+
 
     # -------------------------
     # k-NN
